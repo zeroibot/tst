@@ -36,3 +36,10 @@ func AssertPanic(t *testing.T, name string) {
 		t.Errorf("%s did not panic", name)
 	}
 }
+
+// assertTest calls the test function
+func assertTest(t *testing.T, name string, test func() bool) {
+	if test != nil && test() == false {
+		t.Errorf("%s post test failed", name)
+	}
+}

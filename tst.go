@@ -31,6 +31,14 @@ type P3W1[I1, I2, I3, R any] struct {
 	W1 R
 }
 
+type P3W1Post[I1, I2, I3, R any] struct {
+	P1   I1
+	P2   I2
+	P3   I3
+	W1   R
+	Test func() bool
+}
+
 // AllCompare1 tests 1 pair of [actual, want] from the given generic test cases
 func AllCompare1[T, R any](t *testing.T, testCases []T, name string, testFn func(T) (R, R), assert assertFn[R]) {
 	for i, x := range testCases {
@@ -74,5 +82,15 @@ func AllP3W1[I1, I2, I3, R any](t *testing.T, testCases []P3W1[I1, I2, I3, R], n
 		actual := testFn(x.P1, x.P2, x.P3)
 		label := fmt.Sprintf("%s:%d", name, i)
 		assert(t, label, actual, x.W1)
+	}
+}
+
+// AllP3W1Post tests all P3W1Post test cases and checks the post-test function
+func AllP3W1Post[I1, I2, I3, R any](t *testing.T, testCases []P3W1Post[I1, I2, I3, R], name string, testFn func(I1, I2, I3) R, assert assertFn[R]) {
+	for i, x := range testCases {
+		actual := testFn(x.P1, x.P2, x.P3)
+		label := fmt.Sprintf("%s:%d", name, i)
+		assert(t, label, actual, x.W1)
+		assertTest(t, label, x.Test)
 	}
 }
