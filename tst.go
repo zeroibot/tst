@@ -68,7 +68,7 @@ func AllActionPost[T HasPostTest](t *testing.T, testCases []T, name string, acti
 }
 
 // All checks if all pairs are equal using the assert function
-func All[T any](t *testing.T, name string, pairs [][2]T, assert assertFn[T]) {
+func All[T any](t *testing.T, pairs [][2]T, name string, assert assertFn[T]) {
 	for i, pair := range pairs {
 		label := fmt.Sprintf("%s:%d", name, i)
 		a, b := pair[0], pair[1]

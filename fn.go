@@ -18,6 +18,20 @@ func Convert[T any](items []T, convert func(T) T) []T {
 	return items2
 }
 
+// AssertTrue asserts that the given condition is true
+func AssertTrue(t *testing.T, name string, condition bool) {
+	if condition != true {
+		t.Errorf("%s = condition failed", name)
+	}
+}
+
+// AssertFalse asserts that the given condition is false
+func AssertFalse(t *testing.T, name string, condition bool) {
+	if condition != false {
+		t.Errorf("%s = condition failed", name)
+	}
+}
+
 // AssertDeepEqual asserts that the two `any` items are deeply equal
 func AssertDeepEqual(t *testing.T, name string, a, b any) {
 	if reflect.DeepEqual(a, b) == false {
