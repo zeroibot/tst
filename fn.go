@@ -28,3 +28,11 @@ func AssertMapEqual[M1, M2 ~map[K]V, K, V comparable](t *testing.T, name string,
 		t.Errorf("%s = %v, want %v", name, a, b)
 	}
 }
+
+// AssertPanic asserts that the end of the function will panic
+// Usage: defer AssertPanic(t, name)
+func AssertPanic(t *testing.T, name string) {
+	if err := recover(); err == nil {
+		t.Errorf("%s did not panic", name)
+	}
+}
