@@ -2,6 +2,7 @@ package tst
 
 import (
 	"maps"
+	"reflect"
 	"slices"
 	"testing"
 )
@@ -17,6 +18,20 @@ func Convert[T any](items []T, convert func(T) T) []T {
 	return items2
 }
 
+// AssertDeepEqual asserts that the two `any` items are deeply equal
+func AssertDeepEqual(t *testing.T, name string, a, b any) {
+	if reflect.DeepEqual(a, b) == false {
+		t.Errorf("%s = %v, want %v", name, a, b)
+	}
+}
+
+// AssertDeepEqualAnd asserts that the two `any` items are deeply equal and the boolean flags are equal
+func AssertDeepEqualAnd(t *testing.T, name string, a, b any, flag1, flag2 bool) {
+	if flag1 != flag2 || reflect.DeepEqual(a, b) == false {
+		t.Errorf("%s = %v, %t, want %v, %t", name, a, flag1, b, flag2)
+	}
+}
+
 // AssertEqual asserts that the two given values are equal
 func AssertEqual[T comparable](t *testing.T, name string, a, b T) {
 	if a != b {
@@ -24,9 +39,9 @@ func AssertEqual[T comparable](t *testing.T, name string, a, b T) {
 	}
 }
 
-// AssertEqualAnd asserts that the two given values are equal and the boolean flag is true
+// AssertEqualAnd asserts that the two given values are equal and the boolean flags are equal
 func AssertEqualAnd[T comparable](t *testing.T, name string, a, b T, flag1, flag2 bool) {
-	if a != b || flag1 != flag2 {
+	if flag1 != flag2 || a != b {
 		t.Errorf("%s = %v, %t, want %v, %t", name, a, flag1, b, flag2)
 	}
 }
@@ -43,14 +58,14 @@ func AssertEqualAny(t *testing.T, name string, a, b any) {
 	}
 }
 
-// AssertEqualAnyAnd checks for if two `any` items are equal
+// AssertEqualAnyAnd checks for if two `any` items are equal and the boolean flags are equal
 func AssertEqualAnyAnd(t *testing.T, name string, a, b any, flag1, flag2 bool) {
 	defer func() {
 		if r := recover(); r != nil {
 			t.Errorf("%s panicked", name)
 		}
 	}()
-	if a != b || flag1 != flag2 {
+	if flag1 != flag2 || a != b {
 		t.Errorf("%s = %v, %t, want %v, %t", name, a, flag1, b, flag2)
 	}
 }
@@ -62,9 +77,9 @@ func AssertListEqual[S ~[]T, T comparable](t *testing.T, name string, a, b S) {
 	}
 }
 
-// AssertListEqualAnd asserts that the two given lists are equal
+// AssertListEqualAnd asserts that the two given lists are equal and the boolean flags are equal
 func AssertListEqualAnd[S ~[]T, T comparable](t *testing.T, name string, a, b S, flag1, flag2 bool) {
-	if slices.Equal(a, b) == false || flag1 != flag2 {
+	if flag1 != flag2 || slices.Equal(a, b) == false {
 		t.Errorf("%s = %v, %t, want %v, %t", name, a, flag1, b, flag2)
 	}
 }
@@ -76,9 +91,9 @@ func AssertMapEqual[M1, M2 ~map[K]V, K, V comparable](t *testing.T, name string,
 	}
 }
 
-// AssertMapEqualAnd asserts that the two given maps are equal
+// AssertMapEqualAnd asserts that the two given maps are equal and the boolean flags are equal
 func AssertMapEqualAnd[M1, M2 ~map[K]V, K, V comparable](t *testing.T, name string, a M1, b M2, flag1, flag2 bool) {
-	if maps.Equal(a, b) == false || flag1 != flag2 {
+	if flag1 != flag2 || maps.Equal(a, b) == false {
 		t.Errorf("%s = %v, %t, want %v, %t", name, a, flag1, b, flag2)
 	}
 }
