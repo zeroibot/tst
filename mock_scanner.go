@@ -15,8 +15,8 @@ func NewMockScanner(items ...any) MockScanner {
 
 func (m MockScanner) Scan(fieldRefs ...any) (err error) {
 	defer func() {
-		if err := recover(); err != nil {
-			err = fmt.Errorf("panic encountered: %v", err)
+		if r := recover(); r != nil {
+			err = fmt.Errorf("panic encountered: %v", r)
 		}
 	}()
 	if len(fieldRefs) != len(m.items) {
