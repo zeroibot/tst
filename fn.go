@@ -1,7 +1,6 @@
 package tst
 
 import (
-	"errors"
 	"maps"
 	"reflect"
 	"slices"
@@ -47,10 +46,10 @@ func AssertDeepEqualAnd(t *testing.T, name string, a, b any, flag1, flag2 bool) 
 	}
 }
 
-// AssertDeepEqualError asserts that the two `any` items are deeply equal and that the errors are equal
-func AssertDeepEqualError(t *testing.T, name string, a, b any, err1, err2 error) {
-	if !errors.Is(err1, err2) || reflect.DeepEqual(a, b) == false {
-		t.Errorf("%s = %v, %v, want %v, %v", name, a, err1, b, err2)
+// AssertDeepEqualError asserts that the two `any` items are deeply equal and the error follows notNil flag
+func AssertDeepEqualError(t *testing.T, name string, a, b any, err error, notNil bool) {
+	if (err != nil) != notNil || reflect.DeepEqual(a, b) == false {
+		t.Errorf("%s = %v, %v, want %v, %v", name, a, err, b, notNilString(notNil))
 	}
 }
 
@@ -68,10 +67,10 @@ func AssertEqualAnd[T comparable](t *testing.T, name string, a, b T, flag1, flag
 	}
 }
 
-// AssertEqualError asserts that the two given values are equal and the errors are equal
-func AssertEqualError[T comparable](t *testing.T, name string, a, b T, err1, err2 error) {
-	if !errors.Is(err1, err2) || a != b {
-		t.Errorf("%s = %v, %v, want %v, %v", name, a, err1, b, err2)
+// AssertEqualError asserts that the two given values are equal and the error follows notNil flag
+func AssertEqualError[T comparable](t *testing.T, name string, a, b T, err error, notNil bool) {
+	if (err != nil) != notNil || a != b {
+		t.Errorf("%s = %v, %v, want %v, %v", name, a, err, b, notNilString(notNil))
 	}
 }
 
@@ -99,15 +98,15 @@ func AssertEqualAnyAnd(t *testing.T, name string, a, b any, flag1, flag2 bool) {
 	}
 }
 
-// AssertEqualAnyError checks if two `any` items are equal and the errors are equal
-func AssertEqualAnyError(t *testing.T, name string, a, b any, err1, err2 error) {
+// AssertEqualAnyError checks if two `any` items are equal and the error follows notNil flag
+func AssertEqualAnyError(t *testing.T, name string, a, b any, err error, notNil bool) {
 	defer func() {
 		if r := recover(); r != nil {
 			t.Errorf("%s panicked", name)
 		}
 	}()
-	if !errors.Is(err1, err2) || a != b {
-		t.Errorf("%s = %v, %v, want %v, %v", name, a, err1, b, err2)
+	if (err != nil) != notNil || a != b {
+		t.Errorf("%s = %v, %v, want %v, %v", name, a, err, b, notNilString(notNil))
 	}
 }
 
@@ -125,10 +124,10 @@ func AssertListEqualAnd[S ~[]T, T comparable](t *testing.T, name string, a, b S,
 	}
 }
 
-// AssertListEqualError asserts that the two given lists are equal and the errors are equal
-func AssertListEqualError[S ~[]T, T comparable](t *testing.T, name string, a, b S, err1, err2 error) {
-	if !errors.Is(err1, err2) || slices.Equal(a, b) == false {
-		t.Errorf("%s = %v, %v, want %v, %v", name, a, err1, b, err2)
+// AssertListEqualError asserts that the two given lists are equal and the error follows notNil flag
+func AssertListEqualError[S ~[]T, T comparable](t *testing.T, name string, a, b S, err error, notNil bool) {
+	if (err != nil) != notNil || slices.Equal(a, b) == false {
+		t.Errorf("%s = %v, %v, want %v, %v", name, a, err, b, notNilString(notNil))
 	}
 }
 
@@ -146,10 +145,10 @@ func AssertMapEqualAnd[M1, M2 ~map[K]V, K, V comparable](t *testing.T, name stri
 	}
 }
 
-// AssertMapEqualError asserts that the two given maps are equal and the errors are equal
-func AssertMapEqualError[M1, M2 ~map[K]V, K, V comparable](t *testing.T, name string, a M1, b M2, err1, err2 error) {
-	if !errors.Is(err1, err2) || maps.Equal(a, b) == false {
-		t.Errorf("%s = %v, %v, want %v, %v", name, a, err1, b, err2)
+// AssertMapEqualError asserts that the two given maps are equal and the error follows notNil flag
+func AssertMapEqualError[M1, M2 ~map[K]V, K, V comparable](t *testing.T, name string, a M1, b M2, err error, notNil bool) {
+	if (err != nil) != notNil || maps.Equal(a, b) == false {
+		t.Errorf("%s = %v, %v, want %v, %v", name, a, err, b, notNilString(notNil))
 	}
 }
 
@@ -166,4 +165,12 @@ func assertTest(t *testing.T, name string, test func() bool) {
 	if test != nil && test() == false {
 		t.Errorf("%s post test failed", name)
 	}
+}
+
+// Returns a string for notNil boolean
+func notNilString(notNil bool) string {
+	if notNil {
+		return "<not-nil>"
+	}
+	return "<nil>"
 }
