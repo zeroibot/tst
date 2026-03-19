@@ -60,6 +60,27 @@ func AssertEqual[T comparable](t *testing.T, name string, a, b T) {
 	}
 }
 
+// AssertEqual2 asserts that the two pairs of values are all equal
+func AssertEqual2[T1, T2 comparable](t *testing.T, name string, a1, b1 T1, a2, b2 T2) {
+	if a1 != b1 || a2 != b2 {
+		t.Errorf("%s = %v, %v, want %v, %v", name, a1, a2, b1, b2)
+	}
+}
+
+// AssertEqual3 asserts that the three pairs of values are all equal
+func AssertEqual3[T1, T2, T3 comparable](t *testing.T, name string, a1, b1 T1, a2, b2 T2, a3, b3 T3) {
+	if a1 != b1 || a2 != b2 || a3 != b3 {
+		t.Errorf("%s = %v, %v, %v, want %v, %v, %v", name, a1, a2, a3, b1, b2, b3)
+	}
+}
+
+// AssertEqual4 asserts that the four pairs of values are all equal
+func AssertEqual4[T1, T2, T3, T4 comparable](t *testing.T, name string, a1, b1 T1, a2, b2 T2, a3, b3 T3, a4, b4 T4) {
+	if a1 != b1 || a2 != b2 || a3 != b3 || a4 != b4 {
+		t.Errorf("%s = %v, %v, %v, %v,  want %v, %v,%v, %v", name, a1, a2, a3, a4, b1, b2, b3, b4)
+	}
+}
+
 // AssertEqualAnd asserts that the two given values are equal and the boolean flags are equal
 func AssertEqualAnd[T comparable](t *testing.T, name string, a, b T, flag1, flag2 bool) {
 	if flag1 != flag2 || a != b {
@@ -170,7 +191,7 @@ func assertTest(t *testing.T, name string, test func() bool) {
 // Returns a string for notNil boolean
 func notNilString(notNil bool) string {
 	if notNil {
-		return "<not-nil>"
+		return "<error>"
 	}
 	return "<nil>"
 }
