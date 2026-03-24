@@ -3,8 +3,8 @@ package tst
 import "database/sql"
 
 type Conn struct {
-	row    Row
-	rows   Rows
+	row    *Row
+	rows   *Rows
 	err    error
 	result sql.Result
 }
@@ -22,11 +22,11 @@ func NewTx() *Tx {
 	return new(Tx)
 }
 
-func (c *Conn) QueryRow(query string, args ...any) Row {
+func (c *Conn) QueryRow(query string, args ...any) *Row {
 	return c.row
 }
 
-func (c *Conn) SetRow(row Row) {
+func (c *Conn) SetRow(row *Row) {
 	c.row = row
 }
 
@@ -34,7 +34,11 @@ func (c *Conn) SetError(err error) {
 	c.err = err
 }
 
-func (c *Conn) Query(query string, args ...any) (Rows, error) {
+func (c *Conn) SetRows(rows *Rows) {
+	c.rows = rows
+}
+
+func (c *Conn) Query(query string, args ...any) (*Rows, error) {
 	return c.rows, c.err
 }
 
