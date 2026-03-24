@@ -47,10 +47,6 @@ func (r *Rows) Err() error {
 	return r.err
 }
 
-func (r *Rows) SetError(err error) {
-	r.err = err
-}
-
 func (r *Rows) Next() bool {
 	return r.index < len(r.items)
 }
@@ -73,4 +69,8 @@ func (r *Rows) Scan(fieldRefs ...any) (err error) {
 	}
 	r.index += 1
 	return err
+}
+
+func (r *Rows) SetError(err error) {
+	r.err = err
 }
