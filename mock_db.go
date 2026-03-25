@@ -3,6 +3,7 @@ package tst
 import (
 	"database/sql"
 	"errors"
+	"slices"
 )
 
 var errNotFound = errors.New("not found")
@@ -52,4 +53,39 @@ func (c *Conn[T]) QueryRow(query string, args ...any) *Row {
 
 func (c *Conn[T]) SetError(err error) {
 	c.err = err
+}
+
+func (c *Conn[T]) Prep(testFn func(T) bool, rowFn func([]T) ([]any, error)) func() {
+	return func() {
+		c.SetError(nil)
+		c.testFn = testFn
+		c.rowFn = rowFn
+	}
+}
+
+func (c *Conn[T]) PrepOne(testFn func(T) bool, rowFn func(T) []any) func() {
+	return func() {
+		c.SetError(nil)
+		c.testFn = testFn
+		c.rowFn = func(items []T) ([]any, error) {
+			if len(items) == 0 {
+				return nil, errNotFound
+			}
+			return rowFn(items[0]), nil
+		}
+	}
+}
+
+func (c *Conn[T]) PrepSortOne(testFn func(T) bool, sortFn func(T, T) int, rowFn func(T) []any) func() {
+	return func() {
+		c.SetError(nil)
+		c.testFn = testFn
+		c.rowFn = func(items []T) ([]any, error) {
+			if len(items) == 0 {
+				return nil, errNotFound
+			}
+			slices.SortFunc(items, sortFn)
+			return rowFn(items[0]), nil
+		}
+	}
 }
