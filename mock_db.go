@@ -124,6 +124,8 @@ func (c *Conn[T]) PrepRows(testFn func(T) bool, rowsFn func(T) []any) func() {
 		c.SetError(nil)
 		c.testFn = testFn
 		c.rowsFn = rowsFn
+		c.sortFn = nil
+		c.limit = 0
 	}
 }
 
