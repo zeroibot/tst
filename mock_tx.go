@@ -3,12 +3,16 @@ package tst
 import "database/sql"
 
 type Tx struct {
-	err    error
 	result sql.Result
+	err    error
 }
 
 func NewTx() *Tx {
 	return new(Tx)
+}
+
+func NewTxFrom(result sql.Result, err error) *Tx {
+	return new(Tx{result: result, err: err})
 }
 
 func (t *Tx) Exec(query string, args ...any) (sql.Result, error) {
@@ -25,4 +29,8 @@ func (t *Tx) Rollback() error {
 
 func (t *Tx) SetError(err error) {
 	t.err = err
+}
+
+func (t *Tx) SetResult(result sql.Result) {
+	t.result = result
 }

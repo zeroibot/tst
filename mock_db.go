@@ -12,29 +12,45 @@ var (
 )
 
 type Conn[T any] struct {
-	items   []T
-	err     error
-	rowsErr error
-	testFn  func(T) bool
-	rowFn   func([]T) ([]any, error)
-	rowsFn  func(T) []any
-	sortFn  func(T, T) int
-	limit   int
-	groupFn func([]T) [][]any
+	items      []T
+	err        error
+	rowsErr    error
+	testFn     func(T) bool
+	rowFn      func([]T) ([]any, error)
+	rowsFn     func(T) []any
+	sortFn     func(T, T) int
+	limit      int
+	groupFn    func([]T) [][]any
+	execFn     func([]T) ([]T, error)
+	execResult sql.Result
 }
 
 func NewConn[T any](items ...T) *Conn[T] {
 	return new(Conn[T]{items: items, err: nil})
 }
 
+func (c *Conn[T]) Reset(items ...T) {
+	c.items = items
+}
+
 func (c *Conn[T]) Begin() (*Tx, error) {
-	// TODO: Update for Tx
-	return nil, c.err
+	return new(Tx), c.err
 }
 
 func (c *Conn[T]) Exec(query string, args ...any) (sql.Result, error) {
-	// TODO: Implement
-	return nil, c.err
+	if c.execFn == nil || c.execResult == nil || c.err != nil {
+		err := errMissingParams
+		if c.err != nil {
+			err = c.err
+		}
+		return nil, err
+	}
+	items, err := c.execFn(c.items)
+	if err != nil {
+		return nil, err
+	}
+	c.items = items
+	return c.execResult, nil
 }
 
 func (c *Conn[T]) Query(query string, args ...any) (*Rows, error) {
