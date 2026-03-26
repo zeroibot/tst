@@ -213,3 +213,12 @@ func (c *Conn[T]) PrepExec(execFn func([]T) ([]T, error), result sql.Result) fun
 		c.execResult = result
 	}
 }
+
+func (c *Conn[T]) PrepExecReset(execFn func([]T) ([]T, error), result sql.Result, items ...T) func() {
+	return func() {
+		c.Reset(items...)
+		c.SetError(nil)
+		c.execFn = execFn
+		c.execResult = result
+	}
+}
