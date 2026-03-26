@@ -17,6 +17,8 @@ type Conn[T any] struct {
 	testFn func(T) bool
 	rowFn  func([]T) ([]any, error)
 	rowsFn func(T) []any
+	sortFn func(T, T) int
+	limit  int
 }
 
 func NewConn[T any](items ...T) *Conn[T] {
@@ -47,9 +49,15 @@ func (c *Conn[T]) Query(query string, args ...any) (*Rows, error) {
 			validItems = append(validItems, item)
 		}
 	}
-	rowValues := make([][]any, 0, len(validItems))
-	for _, item := range validItems {
-		rowValues = append(rowValues, c.rowsFn(item))
+	if c.sortFn != nil {
+		slices.SortFunc(validItems, c.sortFn)
+	}
+	if c.limit > 0 {
+		validItems = validItems[:c.limit]
+	}
+	rowValues := make([][]any, len(validItems))
+	for i, item := range validItems {
+		rowValues[i] = c.rowsFn(item)
 	}
 	return NewRows(rowValues...), nil
 }
@@ -96,7 +104,7 @@ func (c *Conn[T]) PrepOne(testFn func(T) bool, rowFn func(T) []any) func() {
 	}
 }
 
-func (c *Conn[T]) PrepSortOne(testFn func(T) bool, sortFn func(T, T) int, rowFn func(T) []any) func() {
+func (c *Conn[T]) PrepSortOne(testFn func(T) bool, rowFn func(T) []any, sortFn func(T, T) int) func() {
 	return func() {
 		c.SetError(nil)
 		c.testFn = testFn
@@ -115,5 +123,15 @@ func (c *Conn[T]) PrepRows(testFn func(T) bool, rowsFn func(T) []any) func() {
 		c.SetError(nil)
 		c.testFn = testFn
 		c.rowsFn = rowsFn
+	}
+}
+
+func (c *Conn[T]) PrepSortRows(testFn func(T) bool, rowsFn func(T) []any, sortFn func(T, T) int, limit int) func() {
+	return func() {
+		c.SetError(nil)
+		c.testFn = testFn
+		c.rowsFn = rowsFn
+		c.sortFn = sortFn
+		c.limit = limit
 	}
 }
