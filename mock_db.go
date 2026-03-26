@@ -53,7 +53,8 @@ func (c *Conn[T]) Query(query string, args ...any) (*Rows, error) {
 		slices.SortFunc(validItems, c.sortFn)
 	}
 	if c.limit > 0 {
-		validItems = validItems[:c.limit]
+		limit := min(c.limit, len(validItems))
+		validItems = validItems[:limit]
 	}
 	rowValues := make([][]any, len(validItems))
 	for i, item := range validItems {
