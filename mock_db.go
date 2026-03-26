@@ -16,7 +16,7 @@ type Conn[T any] struct {
 	err    error
 	testFn func(T) bool
 	rowFn  func([]T) ([]any, error)
-	rowsFn func(T) ([]any, error)
+	rowsFn func(T) []any
 }
 
 func NewConn[T any](items ...T) *Conn[T] {
@@ -49,11 +49,7 @@ func (c *Conn[T]) Query(query string, args ...any) (*Rows, error) {
 	}
 	rowValues := make([][]any, 0, len(validItems))
 	for _, item := range validItems {
-		values, err := c.rowsFn(item)
-		if err != nil {
-			return NewRows(), err
-		}
-		rowValues = append(rowValues, values)
+		rowValues = append(rowValues, c.rowsFn(item))
 	}
 	return NewRows(rowValues...), nil
 }
@@ -114,7 +110,7 @@ func (c *Conn[T]) PrepSortOne(testFn func(T) bool, sortFn func(T, T) int, rowFn 
 	}
 }
 
-func (c *Conn[T]) PrepRows(testFn func(T) bool, rowsFn func(T) ([]any, error)) func() {
+func (c *Conn[T]) PrepRows(testFn func(T) bool, rowsFn func(T) []any) func() {
 	return func() {
 		c.SetError(nil)
 		c.testFn = testFn
