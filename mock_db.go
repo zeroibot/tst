@@ -12,13 +12,14 @@ var (
 )
 
 type Conn[T any] struct {
-	items  []T
-	err    error
-	testFn func(T) bool
-	rowFn  func([]T) ([]any, error)
-	rowsFn func(T) []any
-	sortFn func(T, T) int
-	limit  int
+	items   []T
+	err     error
+	testFn  func(T) bool
+	rowFn   func([]T) ([]any, error)
+	rowsFn  func(T) []any
+	sortFn  func(T, T) int
+	limit   int
+	groupFn func([]T) [][]any
 }
 
 func NewConn[T any](items ...T) *Conn[T] {
@@ -36,7 +37,7 @@ func (c *Conn[T]) Exec(query string, args ...any) (sql.Result, error) {
 }
 
 func (c *Conn[T]) Query(query string, args ...any) (*Rows, error) {
-	if c.testFn == nil || c.rowsFn == nil || c.err != nil {
+	if c.testFn == nil || (c.rowsFn == nil && c.groupFn == nil) || c.err != nil {
 		err := errMissingParams
 		if c.err != nil {
 			err = c.err
@@ -56,9 +57,14 @@ func (c *Conn[T]) Query(query string, args ...any) (*Rows, error) {
 		limit := min(c.limit, len(validItems))
 		validItems = validItems[:limit]
 	}
-	rowValues := make([][]any, len(validItems))
-	for i, item := range validItems {
-		rowValues[i] = c.rowsFn(item)
+	var rowValues [][]any
+	if c.groupFn != nil {
+		rowValues = c.groupFn(validItems)
+	} else {
+		rowValues = make([][]any, len(validItems))
+		for i, item := range validItems {
+			rowValues[i] = c.rowsFn(item)
+		}
 	}
 	return NewRows(rowValues...), nil
 }
@@ -126,6 +132,7 @@ func (c *Conn[T]) PrepRows(testFn func(T) bool, rowsFn func(T) []any) func() {
 		c.rowsFn = rowsFn
 		c.sortFn = nil
 		c.limit = 0
+		c.groupFn = nil
 	}
 }
 
@@ -136,5 +143,17 @@ func (c *Conn[T]) PrepSortRows(testFn func(T) bool, rowsFn func(T) []any, sortFn
 		c.rowsFn = rowsFn
 		c.sortFn = sortFn
 		c.limit = limit
+		c.groupFn = nil
+	}
+}
+
+func (c *Conn[T]) PrepGroup(testFn func(T) bool, groupFn func([]T) [][]any) func() {
+	return func() {
+		c.SetError(nil)
+		c.testFn = testFn
+		c.rowsFn = nil
+		c.sortFn = nil
+		c.limit = 0
+		c.groupFn = groupFn
 	}
 }
