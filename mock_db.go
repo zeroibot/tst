@@ -113,3 +113,11 @@ func (c *Conn[T]) PrepSortOne(testFn func(T) bool, sortFn func(T, T) int, rowFn 
 		}
 	}
 }
+
+func (c *Conn[T]) PrepRows(testFn func(T) bool, rowsFn func(T) ([]any, error)) func() {
+	return func() {
+		c.SetError(nil)
+		c.testFn = testFn
+		c.rowsFn = rowsFn
+	}
+}
