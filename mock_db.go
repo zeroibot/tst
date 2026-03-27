@@ -111,6 +111,10 @@ func (c *Conn[T]) SetError(err error) {
 	c.err = err
 }
 
+func (c *Conn[T]) Items() []T {
+	return c.items
+}
+
 func (c *Conn[T]) PrepRow(testFn func(T) bool, rowFn func([]T) ([]any, error)) func() {
 	return func() {
 		c.SetError(nil)
