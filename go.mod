@@ -1,3 +1,3 @@
-module github.com/roidaradal/tst
+module github.com/zeroibot/tst
 
 go 1.26.0
